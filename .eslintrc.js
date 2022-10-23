@@ -12,6 +12,7 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:jest/recommended',
     'plugin:react/jsx-runtime',
+    'prettier',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
@@ -21,7 +22,7 @@ module.exports = {
     project: './tsconfig.json',
     ecmaVersion: 14,
   },
-  plugins: ['react', '@typescript-eslint'],
+  plugins: ['react', '@typescript-eslint', 'prettier', 'import'],
   rules: {
     'react/jsx-props-no-spreading': 'off',
     'react/prop-types': 'off',
@@ -36,6 +37,7 @@ module.exports = {
     ],
     'no-shadow': 'off',
     '@typescript-eslint/no-shadow': ['error'],
+    '@typescript-eslint/no-empty-interface': 'off',
     'max-len': [
       'warn',
       {
@@ -82,5 +84,15 @@ module.exports = {
         allowTernary: true,
       },
     ],
+  },
+  settings: {
+    'import/resolver': {
+      typescript: {},
+      node: {
+        extensions: ['.js', '.jsx', '.ts', '.tsx', 'module.scss', '.scss'],
+        moduleDirectory: ['src/', 'node_modules'],
+      },
+    },
+    'import/ignore': ['.(scss|css|less)'],
   },
 };

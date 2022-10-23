@@ -1,3 +1,13 @@
+@import '@/styles/variables.scss';
+
 .main {
-  background-color: black;
+  background-color: var(--background-color);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  color: var(--text-color);
+  flex-direction: column;
+  font-family: sans-serif;
 }

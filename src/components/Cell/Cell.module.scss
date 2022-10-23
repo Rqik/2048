@@ -1,0 +1,50 @@
+@import '@/styles/variables.scss';
+
+.cell {
+  --cell-base-color: hsl(30, 59%, 75%);
+  --x: 0;
+  --y: 0;
+  display: block;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--cell-base-color);
+  width: var(--cell-width);
+  height: var(--cell-height);
+  top: calc((var(--cell-width) + var(--gap)) * var(--y) + var(--gap));
+  left: calc((var(--cell-width) + var(--gap)) * var(--x) + var(--gap));
+  border-radius: calc(var(--gap) * 0.61);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 4vmin;
+  font-weight: 600;
+  position: absolute;
+  transition-property: top, left;
+  transition-duration: 1s;
+  transition-timing-function: ease-in-out;
+  animation: show 1s;
+}
+
+@keyframes show {
+  0% {
+    transform: scale(1.1);
+    opacity: 1
+  }
+
+  50% {
+    transform: scale(1.6);
+    opacity: .7;
+  }
+
+  60% {
+    transform: scale(0.6);
+    opacity: 1
+  }
+
+  80% {
+    transform: scale(0.95)
+  }
+
+  100% {
+    transform: scale(0.85)
+  }
+}

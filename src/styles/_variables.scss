@@ -1,0 +1,16 @@
+:root {
+  --size-board: 50vmin;
+  --row-size: 4;
+  --col-size: 4;
+  --gap: 2vmin;
+  --background-color: #faf8ef;
+  --cell-base-color: hsl(30, 37%, 89%);
+  --board-color: #bbada0;
+  --text-color: #776e65;
+  //calc((var(--size-board) - (var(--gap) * var(--col-size)) - var(--gap)) / var(--col-size)) its exact formula
+  --cell-width: calc(var(--size-board) / var(--col-size));
+  //calc((var(--size-board) - (var(--gap) * var(--col-size)) - var(--gap)) / var(--row-size) its exact formula
+  --cell-height: calc(var(--size-board) / var(--row-size));
+}
+
+.ss {}

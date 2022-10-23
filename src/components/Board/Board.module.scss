@@ -1,4 +1,14 @@
+@import '@/styles/variables.scss';
+
 .board {
-  display: block;
-  background-color: beige;
+  box-sizing: border-box;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--col-size), var(--cell-width));
+  grid-template-rows: repeat(var(--row-size), var(--cell-height));
+  background-color: var(--board-color);
+  padding: var(--gap);
+  gap: var(--gap);
+  border-radius: var(--gap);
+  transition: all 1s ease;
 }
