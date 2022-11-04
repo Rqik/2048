@@ -1,9 +1,13 @@
 import { FC, Fragment, useEffect, useRef, useState, useCallback } from 'react';
-import { dummyMatrix, dummyMatrix2 } from 'src/shared/helpers/dummy';
+import {
+  dummyMatrix,
+  dummyMatrix2,
+  dummyMatrix3,
+} from 'src/shared/helpers/dummy';
 import {
   flatSortedMatrix,
   moveCellsUp,
-  rotateMatrix,
+  rotateMatrix90deg,
   updPosition,
 } from 'src/shared/helpers/matrixMethods';
 import Cell from '../Cell';
@@ -11,14 +15,23 @@ import CellEmpty from '../CellEmpty';
 import styles from './Board.module.scss';
 import { CellProps, Matrix, RowCells } from './types';
 
-rotateMatrix(dummyMatrix);
+rotateMatrix90deg(dummyMatrix);
 interface BoardProps {}
 type KeyboardEvents = 'ArrowDown' | 'ArrowUp' | 'ArrowLeft' | 'ArrowRight';
 
+enum Status {
+  MOVING = 'MOVING',
+  COMPLETED = 'COMPLETED',
+}
+
+const statusAnimation = Status.COMPLETED;
+const statusVector: KeyboardEvents = 'ArrowDown';
+
+const durationAnimation = 250; // ms
 const rows = 4;
 const cols = 4;
-const ceilsCount = rows * cols;
-const ceilsArr = Array.from({ length: ceilsCount }, () => '');
+const cellsCount = rows * cols;
+const cellsArr = Array.from({ length: cellsCount }, () => '');
 const rowKey = '--row-size';
 const colKey = '--col-size';
 
@@ -31,12 +44,14 @@ const randomInteger = (min: number, max: number): number => {
 
 const createNullArr = (length: number): (null | number)[] =>
   Array.from({ length }, () => null);
+
 const createRowCells = (length: number, y: number): RowCells =>
   Array.from({ length }, (__, x) => ({
     x,
     y,
     id: Number(`${y}${x}`),
     value: null,
+    status: null,
   }));
 const startM = Array.from({ length: rows }, (_, y) => createRowCells(cols, y));
 // console.log('startM', startM);
@@ -53,41 +68,8 @@ const Board: FC<BoardProps> = (props) => {
   // const matrix2 = useRef<CellProp[][]>(
   //   Array.from({ length: rows }, (_, y) => createCells(cols, y)),
   // );
-  const [matrix2, setMatrix2] = useState<Matrix>(dummyMatrix2);
+  const [matrix2, setMatrix2] = useState<Matrix>(dummyMatrix3);
   // console.log('startM', startM);
-
-  // useEffect(() => {
-  //   Array.from({ length: maxStartSize }, () => '').forEach(() => {
-  //     const x = randomInteger(0, cols - 1);
-  //     const y = randomInteger(0, rows - 1);
-  //     setMatrix((state) => {
-  //       const result = [...state];
-  //       result[y][x] = generateTeal();
-  //       return result;
-  //     });
-  //   });
-  // }, []);
-  // useEffect(() => {
-  //   Array.from({ length: maxStartSize }, () => '').forEach(() => {
-  //     const x = randomInteger(0, cols - 1);
-  //     const y = randomInteger(0, rows - 1);
-  //     setMatrix2((state) => {
-  //       const result = [...state];
-  //       result[y][x].value = generateTeal();
-  //       return result;
-  //     });
-  //   });
-  // }, []);
-  // useEffect(() => {
-  //   Array.from({ length: maxStartSize }, () => '').forEach(() => {
-  //     const x = randomInteger(0, cols - 1);
-  //     const y = randomInteger(0, rows - 1);
-
-  //     const result = [...matrix2];
-  //     result[y][x].value = generateTeal();
-  //     setMatrix2(result);
-  //   });
-  // }, []);
 
   useEffect(() => {
     if (boardRef.current) {
@@ -95,49 +77,7 @@ const Board: FC<BoardProps> = (props) => {
       boardRef.current.style.setProperty(colKey, `${cols}`);
     }
   }, []);
-  // console.log(matrix2);
 
-  const moveArrayUp = useCallback((matr: CellProps[][]): CellProps[][] => {
-    const newMatrix = matr;
-    // console.log(matr);
-
-    const a = newMatrix.map((row, y, arr) => {
-      let prevArr = row;
-      let currentArr = row;
-      if (y !== 0) {
-        prevArr = arr[y - 1];
-        currentArr = currentArr.map((el, x) => {
-          if (el.value === null) return el;
-          let i = y - 1;
-          while (arr[i][x].value === null && i > 0) {
-            i -= 1;
-          }
-          // console.log(i, y, x);
-
-          const findedVal = arr[i][x].value;
-          // console.log(findedVal);
-
-          if (findedVal === null) {
-            return { ...el, y: i, value: el.value };
-          }
-
-          return { ...el, y: i, value: findedVal + el.value };
-        });
-      }
-      // console.log('currentArr', currentArr);
-
-      // const arr = row.map(() => {});
-      return currentArr;
-    });
-    return a;
-  }, []);
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  // const direM = (): CellProp[][] => {
-  //   const s = structuredClone(matrix2).map((row) =>
-  //     row.map((el) => ({ ...el, y: el.y - 1 })),
-  //   );
-  //   return s;
-  // };
   const handleArrowDown = useCallback(
     (e: KeyboardEvent): void => {
       const event: KeyboardEvents | string = e.key;
@@ -151,16 +91,20 @@ const Board: FC<BoardProps> = (props) => {
         }
         case 'ArrowDown': {
           newMatrix = updPosition(
-            rotateMatrix(
-              rotateMatrix(moveCellsUp(rotateMatrix(rotateMatrix(matrix2)))),
+            rotateMatrix90deg(
+              rotateMatrix90deg(
+                moveCellsUp(rotateMatrix90deg(rotateMatrix90deg(matrix2))),
+              ),
             ),
           );
           break;
         }
         case 'ArrowLeft': {
           newMatrix = updPosition(
-            rotateMatrix(
-              rotateMatrix(rotateMatrix(moveCellsUp(rotateMatrix(matrix2)))),
+            rotateMatrix90deg(
+              rotateMatrix90deg(
+                rotateMatrix90deg(moveCellsUp(rotateMatrix90deg(matrix2))),
+              ),
             ),
           );
           setMatrix2(newMatrix);
@@ -168,8 +112,12 @@ const Board: FC<BoardProps> = (props) => {
         }
         case 'ArrowRight': {
           newMatrix = updPosition(
-            rotateMatrix(
-              moveCellsUp(rotateMatrix(rotateMatrix(rotateMatrix(matrix2)))),
+            rotateMatrix90deg(
+              moveCellsUp(
+                rotateMatrix90deg(
+                  rotateMatrix90deg(rotateMatrix90deg(matrix2)),
+                ),
+              ),
             ),
           );
           setMatrix2(newMatrix);
@@ -192,12 +140,12 @@ const Board: FC<BoardProps> = (props) => {
   }, [handleArrowDown]);
 
   // console.log(siz.current);
-  // console.log(matrix2);
+  console.log('------------------------', matrix2);
   return (
     <div className={styles.board} ref={boardRef}>
-      {ceilsArr.map((_, x) => (
+      {cellsArr.map((_, x) => (
         // eslint-disable-next-line react/no-array-index-key
-        <CellEmpty key={x} />
+        <CellEmpty key={x}> {x}</CellEmpty>
       ))}
       {/* {matrix.map((row, y) =>
         row.map((val, x) => {
@@ -207,11 +155,13 @@ const Board: FC<BoardProps> = (props) => {
           return <Cell key={`${x}_${y}`} value={val} x={x} y={y} />;
         }),
       )} */}
-      {flatSortedMatrix(matrix2).map(({ value, x, y, id }) => {
+      {flatSortedMatrix(matrix2).map(({ value, x, y, id, status }) => {
         // eslint-disable-next-line react/no-array-index-key
         if (value === null) return <Fragment key={id} />;
         // eslint-disable-next-line react/no-array-index-key
-        return <Cell key={id} value={value} x={x} y={y} />;
+        return (
+          <Cell key={id} value={value} x={x} y={y} id={id} status={status} />
+        );
       })}
     </div>
   );

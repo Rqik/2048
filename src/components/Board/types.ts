@@ -3,6 +3,7 @@ type CellProps = {
   y: number;
   id: number;
   value: number | null;
+  status: 'moving' | 'moving-start' | 'inner' | null | string;
 };
 
 type RowCells = CellProps[];

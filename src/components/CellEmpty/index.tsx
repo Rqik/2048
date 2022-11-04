@@ -1,6 +1,8 @@
-import { FC } from 'react';
-import styles from './CeilEmpty.module.scss';
+import { FC, PropsWithChildren } from 'react';
+import styles from './CellEmpty.module.scss';
 
-const CellEmpty: FC = () => <div className={styles.empty} />;
+const CellEmpty: FC<PropsWithChildren> = ({ children }) => (
+  <div className={styles.empty}>{children}</div>
+);
 
 export default CellEmpty;

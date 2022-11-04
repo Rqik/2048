@@ -8,8 +8,8 @@
   width: calc(var(--size-board) / var(--rows))px;
   border-radius: calc(var(--gap) * 0.61);
   display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 4vmin;
+  justify-content: flex-end;
+  align-items: flex-start;
+  font-size: 2vmin;
   font-weight: 600;
 }
