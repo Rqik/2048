@@ -12,6 +12,8 @@
     "@types/react-dom": "^18.0.0",
     "airbnb": "^0.0.2",
     "clsx": "^1.2.1",
+    "mobx": "^6.6.2",
+    "mobx-react-lite": "^3.4.0",
     "normalize.css": "^8.0.1",
     "react": "^18.2.0",
     "react-app-rewired": "^2.2.1",

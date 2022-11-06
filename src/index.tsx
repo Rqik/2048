@@ -5,6 +5,7 @@ import 'normalize.css';
 import Main from '@/pages/Main';
 
 import reportWebVitals from './reportWebVitals';
+import RootStoreProvider from './store/RootStoreProvider';
 import './styles/index.scss';
 
 const root = ReactDOM.createRoot(
@@ -12,7 +13,9 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <Main />
+    <RootStoreProvider>
+      <Main />
+    </RootStoreProvider>
   </React.StrictMode>,
 );
 

@@ -45,7 +45,7 @@ const testRow2: RowCells = [
     y: 0,
     id: 0,
     value: 2,
-    status: 'inner',
+    status: 'stop',
   },
   {
     x: 1,
@@ -76,7 +76,7 @@ const testRow3: RowCells = [
     y: 0,
     id: 0,
     value: 2,
-    status: 'inner',
+    status: 'stop',
   },
   {
     x: 1,
@@ -127,7 +127,7 @@ const testRow4: RowCells = [
     y: 0,
     id: 0,
     value: 2,
-    status: 'inner',
+    status: 'stop',
   },
   {
     x: 1,
@@ -158,7 +158,7 @@ const testRow5: RowCells = [
     y: 0,
     id: 0,
     value: 2,
-    status: 'inner',
+    status: 'stop',
   },
   {
     x: 1,
@@ -217,7 +217,7 @@ const testRow6: RowCells = [
     y: 0,
     id: 0,
     value: 2,
-    status: 'inner',
+    status: 'stop',
   },
   {
     x: 1,

@@ -3,7 +3,8 @@ type CellProps = {
   y: number;
   id: number;
   value: number | null;
-  status: 'moving' | 'moving-start' | 'inner' | null | string;
+  status: 'moving' | 'stop' | 'create' | null;
+  linkedCellId?: number | null;
 };
 
 type RowCells = CellProps[];

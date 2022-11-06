@@ -10,10 +10,11 @@ import {
   rotateMatrix90deg,
   updPosition,
 } from 'src/shared/helpers/matrixMethods';
+import useRootStore from 'src/store';
 import Cell from '../Cell';
 import CellEmpty from '../CellEmpty';
 import styles from './Board.module.scss';
-import { CellProps, Matrix, RowCells } from './types';
+import { Matrix, RowCells } from './types';
 
 rotateMatrix90deg(dummyMatrix);
 interface BoardProps {}
@@ -53,23 +54,101 @@ const createRowCells = (length: number, y: number): RowCells =>
     value: null,
     status: null,
   }));
+
 const startM = Array.from({ length: rows }, (_, y) => createRowCells(cols, y));
 // console.log('startM', startM);
 
 const maxStartSize = randomInteger(4, 8);
 const Board: FC<BoardProps> = (props) => {
+  const { rootState } = useRootStore();
   const boardRef = useRef<HTMLDivElement>(null);
   const siz = useRef(2);
 
-  const [matrix, setMatrix] = useState(
-    Array.from({ length: rows }, () => createNullArr(cols)),
-  );
+  const [matrix, setMatrix] = useState(startM);
+  // console.log(startM);
 
   // const matrix2 = useRef<CellProp[][]>(
   //   Array.from({ length: rows }, (_, y) => createCells(cols, y)),
   // );
-  const [matrix2, setMatrix2] = useState<Matrix>(dummyMatrix3);
-  // console.log('startM', startM);
+  // const [matrix, setMatrix2] = useState<Matrix>(dummyMatrix3);
+
+  const addTeal = (mtx: Matrix, limit = 0): Matrix => {
+    let i = 0;
+    const result = [...mtx];
+    Array.from({ length: maxStartSize }, () => '').forEach(() => {
+      if (limit === 0 || i <= limit) {
+        i += 1;
+        const x = randomInteger(0, cols - 1);
+        const y = randomInteger(0, rows - 1);
+        console.log('asdjklh');
+        const cell = result[y][x];
+        if (cell.value === null) {
+          cell.value = generateTeal();
+          cell.status = 'create';
+        }
+      }
+    });
+    return result;
+  };
+
+  const handleArrowClick = useCallback(
+    (e: KeyboardEvent): void => {
+      const event: KeyboardEvents | string = e.key;
+      let newMatrix = matrix;
+      let score = 0;
+
+      switch (event) {
+        case 'ArrowUp': {
+          const { matrix: m, score: s } = moveCellsUp(matrix);
+          newMatrix = updPosition(m);
+          score = s;
+          break;
+        }
+        case 'ArrowRight': {
+          const { matrix: m, score: s } = moveCellsUp(
+            rotateMatrix90deg(rotateMatrix90deg(rotateMatrix90deg(matrix))),
+          );
+          score = s;
+          newMatrix = updPosition(rotateMatrix90deg(m));
+          break;
+        }
+        case 'ArrowDown': {
+          const { matrix: m, score: s } = moveCellsUp(
+            rotateMatrix90deg(rotateMatrix90deg(matrix)),
+          );
+          score = s;
+          newMatrix = updPosition(rotateMatrix90deg(rotateMatrix90deg(m)));
+          break;
+        }
+        case 'ArrowLeft': {
+          const { matrix: m, score: s } = moveCellsUp(
+            rotateMatrix90deg(matrix),
+          );
+          score = s;
+          newMatrix = updPosition(
+            rotateMatrix90deg(rotateMatrix90deg(rotateMatrix90deg(m))),
+          );
+          break;
+        }
+        default:
+          break;
+      }
+      rootState.addScore(score);
+
+      setMatrix(newMatrix);
+      setTimeout(() => {
+        setMatrix(addTeal(newMatrix, 30));
+      }, 500);
+    },
+    [matrix, addTeal],
+  );
+  console.log('-----------', matrix);
+
+  useEffect(() => {
+    setMatrix(addTeal(matrix, 30));
+    // addTeal(3);
+    // addTeal(3);
+  }, []);
 
   useEffect(() => {
     if (boardRef.current) {
@@ -78,90 +157,35 @@ const Board: FC<BoardProps> = (props) => {
     }
   }, []);
 
-  const handleArrowDown = useCallback(
-    (e: KeyboardEvent): void => {
-      const event: KeyboardEvents | string = e.key;
-      let newMatrix = matrix2;
-      siz.current += 6;
-      switch (event) {
-        case 'ArrowUp': {
-          newMatrix = updPosition(moveCellsUp(matrix2));
-          setMatrix2(newMatrix);
-          break;
-        }
-        case 'ArrowDown': {
-          newMatrix = updPosition(
-            rotateMatrix90deg(
-              rotateMatrix90deg(
-                moveCellsUp(rotateMatrix90deg(rotateMatrix90deg(matrix2))),
-              ),
-            ),
-          );
-          break;
-        }
-        case 'ArrowLeft': {
-          newMatrix = updPosition(
-            rotateMatrix90deg(
-              rotateMatrix90deg(
-                rotateMatrix90deg(moveCellsUp(rotateMatrix90deg(matrix2))),
-              ),
-            ),
-          );
-          setMatrix2(newMatrix);
-          break;
-        }
-        case 'ArrowRight': {
-          newMatrix = updPosition(
-            rotateMatrix90deg(
-              moveCellsUp(
-                rotateMatrix90deg(
-                  rotateMatrix90deg(rotateMatrix90deg(matrix2)),
-                ),
-              ),
-            ),
-          );
-          setMatrix2(newMatrix);
-          break;
-        }
-        default:
-          break;
-      }
-      setMatrix2(newMatrix);
-    },
-    [matrix2],
-  );
-
   useEffect(() => {
-    window.addEventListener('keydown', handleArrowDown);
+    window.addEventListener('keydown', handleArrowClick);
 
     return () => {
-      window.removeEventListener('keydown', handleArrowDown);
+      window.removeEventListener('keydown', handleArrowClick);
     };
-  }, [handleArrowDown]);
+  }, [handleArrowClick]);
 
-  // console.log(siz.current);
-  console.log('------------------------', matrix2);
   return (
     <div className={styles.board} ref={boardRef}>
       {cellsArr.map((_, x) => (
         // eslint-disable-next-line react/no-array-index-key
         <CellEmpty key={x}> {x}</CellEmpty>
       ))}
-      {/* {matrix.map((row, y) =>
-        row.map((val, x) => {
-          // eslint-disable-next-line react/no-array-index-key
-          if (val === null) return <Fragment key={`${x}_${y}`} />;
-          // eslint-disable-next-line react/no-array-index-key
-          return <Cell key={`${x}_${y}`} value={val} x={x} y={y} />;
-        }),
-      )} */}
-      {flatSortedMatrix(matrix2).map(({ value, x, y, id, status }) => {
-        // eslint-disable-next-line react/no-array-index-key
-        if (value === null) return <Fragment key={id} />;
-        // eslint-disable-next-line react/no-array-index-key
-        return (
-          <Cell key={id} value={value} x={x} y={y} id={id} status={status} />
-        );
+
+      {flatSortedMatrix(matrix).map((cell, i) => {
+        const { value, id, status, linkedCellId } = cell;
+        if (value === null && status !== 'stop') return <Fragment key={id} />;
+        if (status === 'stop')
+          return (
+            <Cell
+              key={id}
+              {...cell}
+              connectCell={matrix
+                .flat()
+                .find(({ id: uId }) => linkedCellId === uId)}
+            />
+          );
+        return <Cell key={id} {...cell} />;
       })}
     </div>
   );
