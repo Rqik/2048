@@ -5,9 +5,18 @@
   align-items: center;
   justify-content: space-between;
   text-transform: uppercase;
+  flex-direction: column;
   font-weight: 600;
   font-size: 36px;
   width: 100%;
   max-width: 60vmin;
   vertical-align: middle;
+}
+
+.score {
+  display: flex;
+  width: 100%;
+
+  align-items: center;
+  justify-content: space-between;
 }

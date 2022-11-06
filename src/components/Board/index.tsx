@@ -1,3 +1,4 @@
+import { observer } from 'mobx-react-lite';
 import { FC, Fragment, useEffect, useRef, useState, useCallback } from 'react';
 import {
   dummyMatrix,
@@ -14,7 +15,7 @@ import useRootStore from 'src/store';
 import Cell from '../Cell';
 import CellEmpty from '../CellEmpty';
 import styles from './Board.module.scss';
-import { Matrix, RowCells } from './types';
+import { CellProps, Matrix, RowCells } from './types';
 
 rotateMatrix90deg(dummyMatrix);
 interface BoardProps {}
@@ -28,15 +29,10 @@ enum Status {
 const statusAnimation = Status.COMPLETED;
 const statusVector: KeyboardEvents = 'ArrowDown';
 
-const durationAnimation = 250; // ms
-const rows = 4;
-const cols = 4;
-const cellsCount = rows * cols;
-const cellsArr = Array.from({ length: cellsCount }, () => '');
 const rowKey = '--row-size';
 const colKey = '--col-size';
 
-const generateTeal = (): number => (Math.random() > 0.5 ? 2 : 4);
+const generateTeal = (): number => (Math.random() > 0.33 ? 2 : 4);
 
 const randomInteger = (min: number, max: number): number => {
   const rand = min + Math.random() * (max + 1 - min);
@@ -55,40 +51,43 @@ const createRowCells = (length: number, y: number): RowCells =>
     status: null,
   }));
 
-const startM = Array.from({ length: rows }, (_, y) => createRowCells(cols, y));
-// console.log('startM', startM);
-
 const maxStartSize = randomInteger(4, 8);
 const Board: FC<BoardProps> = (props) => {
   const { rootState } = useRootStore();
   const boardRef = useRef<HTMLDivElement>(null);
   const siz = useRef(2);
+  const { rows, cols } = rootState;
+
+  const [cellsCount, setCellsCount] = useState(rows * cols);
+  const [startM, setStartM] = useState(
+    Array.from({ length: rows }, (_, y) => createRowCells(cols, y)),
+  );
+  const [cellsArr, setCellsArr] = useState(createNullArr(cellsCount));
 
   const [matrix, setMatrix] = useState(startM);
-  // console.log(startM);
 
-  // const matrix2 = useRef<CellProp[][]>(
-  //   Array.from({ length: rows }, (_, y) => createCells(cols, y)),
-  // );
-  // const [matrix, setMatrix2] = useState<Matrix>(dummyMatrix3);
+  const addTeal = (mtx: Matrix, minCount = 1): Matrix => {
+    const result = mtx.flat().filter((cell) => cell.value === null);
+    if (result.length !== 0) {
+      const idArr: number[] = [];
+      const count = randomInteger(minCount, 2);
 
-  const addTeal = (mtx: Matrix, limit = 0): Matrix => {
-    let i = 0;
-    const result = [...mtx];
-    Array.from({ length: maxStartSize }, () => '').forEach(() => {
-      if (limit === 0 || i <= limit) {
-        i += 1;
-        const x = randomInteger(0, cols - 1);
-        const y = randomInteger(0, rows - 1);
-        console.log('asdjklh');
-        const cell = result[y][x];
-        if (cell.value === null) {
-          cell.value = generateTeal();
-          cell.status = 'create';
-        }
-      }
-    });
-    return result;
+      Array.from({ length: count }).forEach((): void => {
+        const key = randomInteger(0, result.length - 1);
+        idArr.push(result[key].id);
+      });
+      return mtx.map((el) =>
+        el.map((cell) => {
+          const nCell = { ...cell };
+          if (idArr.includes(nCell.id)) {
+            nCell.value = generateTeal();
+            nCell.status = 'create';
+          }
+          return nCell;
+        }),
+      );
+    }
+    return mtx;
   };
 
   const handleArrowClick = useCallback(
@@ -133,29 +132,33 @@ const Board: FC<BoardProps> = (props) => {
         default:
           break;
       }
-      rootState.addScore(score);
-
+      rootState.setMaScore(rootState.addScore(score));
       setMatrix(newMatrix);
-      setTimeout(() => {
-        setMatrix(addTeal(newMatrix, 30));
-      }, 500);
+      setMatrix(addTeal(newMatrix, 1));
     },
     [matrix, addTeal],
   );
-  console.log('-----------', matrix);
 
   useEffect(() => {
-    setMatrix(addTeal(matrix, 30));
-    // addTeal(3);
-    // addTeal(3);
-  }, []);
+    setCellsArr(createNullArr(cellsCount));
+    console.log('cellsArr', cellsArr);
+  }, [cellsCount]);
+
+  useEffect(() => {
+    setCellsCount(rows * cols);
+    setStartM(Array.from({ length: rows }, (_, y) => createRowCells(cols, y)));
+  }, [rows, cols]);
+
+  useEffect(() => {
+    setMatrix(addTeal(startM, 2));
+  }, [startM]);
 
   useEffect(() => {
     if (boardRef.current) {
       boardRef.current.style.setProperty(rowKey, `${rows}`);
       boardRef.current.style.setProperty(colKey, `${cols}`);
     }
-  }, []);
+  }, [rows, cols]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleArrowClick);
@@ -169,7 +172,7 @@ const Board: FC<BoardProps> = (props) => {
     <div className={styles.board} ref={boardRef}>
       {cellsArr.map((_, x) => (
         // eslint-disable-next-line react/no-array-index-key
-        <CellEmpty key={x}> {x}</CellEmpty>
+        <CellEmpty key={x} />
       ))}
 
       {flatSortedMatrix(matrix).map((cell, i) => {
@@ -191,4 +194,4 @@ const Board: FC<BoardProps> = (props) => {
   );
 };
 
-export default Board;
+export default observer(Board);

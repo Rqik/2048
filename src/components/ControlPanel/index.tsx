@@ -8,13 +8,43 @@ import styles from './ControlPanel.module.scss';
 // }
 
 const ControlPanel: FC = () => {
-  const {
-    rootState: { score },
-  } = useRootStore();
+  const { rootState } = useRootStore();
+  const { score, maxScore, rows, cols } = rootState;
+
+  const handleRowsChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    rootState.setRows(Number(e.target.value));
+  };
+
+  const handleColsChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    rootState.setCols(Number(e.target.value));
+  };
+
   return (
     <div className={styles.controlPanel}>
-      <div>Score : {score}</div>
-      <div>Max Score</div>
+      <div className={styles.score}>
+        <div>Score : {score}</div>
+        <div>Max Score: {maxScore}</div>
+      </div>
+      <div>
+        <div>
+          cols{' '}
+          <input
+            value={cols}
+            onChange={handleColsChange}
+            type="number"
+            step={1}
+          />
+        </div>
+        <div>
+          rows{' '}
+          <input
+            value={rows}
+            onChange={handleRowsChange}
+            type="number"
+            step={1}
+          />
+        </div>
+      </div>
     </div>
   );
 };

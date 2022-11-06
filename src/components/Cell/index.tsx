@@ -1,23 +1,32 @@
 import { clsx } from 'clsx';
 import { FC, memo, useEffect, useRef, useState } from 'react';
+import { ListFormat } from 'typescript';
 import { CellProps } from '../Board/types';
 import styles from './Cell.module.scss';
 
 const duration = 270; // ms
 const delay = 180; // ms
 
+const fillMap = (val: number): string => styles[`cell${val}`];
+
 const Cell: FC<CellProps & { connectCell?: CellProps }> = memo(
-  ({ value, x, y, status, connectCell }) => {
+  ({ value, x, y, status, connectCell, id }) => {
     const cellRef = useRef<HTMLDivElement>(null);
     const [oldValue, setOldValue] = useState(value);
     const [anim, setAnim] = useState(false);
+    if (value === null) {
+      console.log(value, id, x, y, status);
+    }
 
     useEffect(() => {
-      if (cellRef.current) {
+      if (cellRef.current && (status !== 'create' || status === null)) {
         cellRef.current.style.setProperty('--delay', `${delay}ms`);
         cellRef.current.style.setProperty('--duration', `${duration}ms`);
+      } else if (cellRef.current) {
+        cellRef.current.style.setProperty('--delay', `${0}ms`);
+        cellRef.current.style.setProperty('--duration', `${0}ms`);
       }
-    }, []);
+    }, [status]);
 
     useEffect(() => {
       if (!cellRef.current) return;
@@ -41,7 +50,7 @@ const Cell: FC<CellProps & { connectCell?: CellProps }> = memo(
       if (typeof status === 'string') {
         setAnim(true);
         setTimeout(() => {
-          setOldValue(value);
+          setOldValue(() => value);
         }, duration);
       }
 
@@ -55,8 +64,10 @@ const Cell: FC<CellProps & { connectCell?: CellProps }> = memo(
         className={clsx(
           styles.cell,
           value && styles.cellUp,
+          !oldValue && styles.cellHide,
           anim && styles.cellBouncing,
           status === 'create' && styles.cellCreated,
+          oldValue && fillMap(oldValue),
         )}
         onAnimationEnd={() => {
           if (anim) {
