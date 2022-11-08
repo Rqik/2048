@@ -4,7 +4,7 @@ import { ListFormat } from 'typescript';
 import { CellProps } from '../Board/types';
 import styles from './Cell.module.scss';
 
-const duration = 270; // ms
+const duration = 180; // ms
 const delay = 180; // ms
 
 const fillMap = (val: number): string => styles[`cell${val}`];

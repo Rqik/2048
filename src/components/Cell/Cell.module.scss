@@ -1,4 +1,4 @@
-@import '@/styles/variables.scss';
+@import '@/styles/_mixins.scss';
 
 .cell {
   --cell-base-color: hsl(30, 59%, 75%);
@@ -27,7 +27,7 @@
   z-index: var(--z-index);
 
   &Bouncing {
-    animation: bouncing var(--delay) var(--duration) both;
+    animation: bouncing ease-in-out 500ms both;
   }
 
   &Hide {
@@ -88,19 +88,6 @@
   }
 }
 
-@keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: scale(0);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-
 @keyframes bouncing {
   0% {
     transform: scale(1.05);
@@ -108,12 +95,12 @@
   }
 
   50% {
-    transform: scale(1.1);
+    transform: scale(1.2);
     opacity: .8;
   }
 
   60% {
-    transform: scale(0.85);
+    transform: scale(0.65);
     opacity: 1
   }
 

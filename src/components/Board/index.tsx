@@ -1,10 +1,9 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faRotate } from '@fortawesome/free-solid-svg-icons';
 import { observer } from 'mobx-react-lite';
 import { FC, Fragment, useEffect, useRef, useState, useCallback } from 'react';
-import {
-  dummyMatrix,
-  dummyMatrix2,
-  dummyMatrix3,
-} from 'src/shared/helpers/dummy';
+
+import { dummyMatrix } from 'src/shared/helpers/dummy';
 import {
   flatSortedMatrix,
   moveCellsUp,
@@ -12,10 +11,11 @@ import {
   updPosition,
 } from 'src/shared/helpers/matrixMethods';
 import useRootStore from 'src/store';
+import { Game } from 'src/store/types';
 import Cell from '../Cell';
 import CellEmpty from '../CellEmpty';
 import styles from './Board.module.scss';
-import { CellProps, Matrix, RowCells } from './types';
+import { Matrix, RowCells } from './types';
 
 rotateMatrix90deg(dummyMatrix);
 interface BoardProps {}
@@ -55,13 +55,10 @@ const maxStartSize = randomInteger(4, 8);
 const Board: FC<BoardProps> = (props) => {
   const { rootState } = useRootStore();
   const boardRef = useRef<HTMLDivElement>(null);
-  const siz = useRef(2);
   const { rows, cols } = rootState;
 
   const [cellsCount, setCellsCount] = useState(rows * cols);
-  const [startM, setStartM] = useState(
-    Array.from({ length: rows }, (_, y) => createRowCells(cols, y)),
-  );
+  const [startM, setStartM] = useState<Matrix>([]);
   const [cellsArr, setCellsArr] = useState(createNullArr(cellsCount));
 
   const [matrix, setMatrix] = useState(startM);
@@ -139,6 +136,19 @@ const Board: FC<BoardProps> = (props) => {
     [matrix, addTeal],
   );
 
+  const startGame = (): void => {
+    setStartM(Array.from({ length: rows }, (_, y) => createRowCells(cols, y)));
+  };
+
+  const handleRestartClick = (): void => {
+    startGame();
+    rootState.restart();
+  };
+
+  useEffect(() => {
+    startGame();
+  }, []);
+
   useEffect(() => {
     setCellsArr(createNullArr(cellsCount));
     console.log('cellsArr', cellsArr);
@@ -146,7 +156,7 @@ const Board: FC<BoardProps> = (props) => {
 
   useEffect(() => {
     setCellsCount(rows * cols);
-    setStartM(Array.from({ length: rows }, (_, y) => createRowCells(cols, y)));
+    startGame();
   }, [rows, cols]);
 
   useEffect(() => {
@@ -168,8 +178,24 @@ const Board: FC<BoardProps> = (props) => {
     };
   }, [handleArrowClick]);
 
+  useEffect(() => {
+    if (rootState.status === Game.RESTART) {
+      startGame();
+    }
+  }, [rootState.status]);
+
   return (
     <div className={styles.board} ref={boardRef}>
+      {rootState.status === Game.FINISH && (
+        <div className={styles.overlay}>
+          <div className={styles.content}>
+            <h2>Game over</h2>
+            <button type="button" onClick={handleRestartClick}>
+              restart <FontAwesomeIcon icon={faRotate} />
+            </button>
+          </div>
+        </div>
+      )}
       {cellsArr.map((_, x) => (
         // eslint-disable-next-line react/no-array-index-key
         <CellEmpty key={x} />

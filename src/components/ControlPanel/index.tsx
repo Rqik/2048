@@ -1,11 +1,10 @@
 import { observer } from 'mobx-react-lite';
 import { FC } from 'react';
 import useRootStore from 'src/store';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faRotate } from '@fortawesome/free-solid-svg-icons';
+import Field from '../Field';
 import styles from './ControlPanel.module.scss';
-
-// interface ControlPanelProps {
-//   score?: number;
-// }
 
 const ControlPanel: FC = () => {
   const { rootState } = useRootStore();
@@ -25,25 +24,10 @@ const ControlPanel: FC = () => {
         <div>Score : {score}</div>
         <div>Max Score: {maxScore}</div>
       </div>
-      <div>
-        <div>
-          cols{' '}
-          <input
-            value={cols}
-            onChange={handleColsChange}
-            type="number"
-            step={1}
-          />
-        </div>
-        <div>
-          rows{' '}
-          <input
-            value={rows}
-            onChange={handleRowsChange}
-            type="number"
-            step={1}
-          />
-        </div>
+      <div className={styles.matrix}>
+        <Field value={cols} onChange={handleColsChange} label="cols" />
+        <Field value={rows} onChange={handleRowsChange} label="rows" />
+        <FontAwesomeIcon icon={faRotate} />
       </div>
     </div>
   );

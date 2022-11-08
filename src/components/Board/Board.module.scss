@@ -1,4 +1,4 @@
-@import '@/styles/variables.scss';
+@import '@/styles/_mixins.scss';
 
 .board {
   box-sizing: border-box;
@@ -11,4 +11,33 @@
   gap: var(--gap);
   border-radius: var(--gap);
   transition: all 1s ease;
+  overflow: hidden;
+}
+
+.overlay {
+  z-index: 4;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: var(--font-family);
+  font-size: 3vmin;
+  background-color: hsla(39deg, 51%, 86%, 0.7);
+  animation: fade-background 2s ease-in-out 100ms 1 backwards;
+}
+
+.content {
+  animation: fade-in 2s ease-in-out 100ms 1 backwards;
+}
+
+@keyframes fade-background {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }

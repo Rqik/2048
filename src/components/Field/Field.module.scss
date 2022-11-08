@@ -1,0 +1,23 @@
+.field {
+  background-color: #6E685C;
+  color: hsl(30, 50%, 80%);
+  padding: 8px 14px;
+  border-radius: 8px;
+  height: 100%;
+  display: flex;
+  width: max-content;
+  align-items: center;
+  gap: 8px;
+}
+
+.label {}
+
+.input {
+  width: 120px;
+  color: var(--text-color);
+  font-weight: 600;
+  border-radius: 5px;
+  border: none;
+  padding: 3px 7px;
+  background-color: hsl(39, 51%, 86%);
+}

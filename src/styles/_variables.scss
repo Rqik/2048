@@ -11,6 +11,5 @@
   --cell-width: calc(var(--size-board) / var(--col-size));
   //calc((var(--size-board) - (var(--gap) * var(--col-size)) - var(--gap)) / var(--row-size) its exact formula
   --cell-height: calc(var(--size-board) / var(--row-size));
+  --font-family: 'Montserrat', 'Arial', sans-serif;
 }
-
-.ss {}
