@@ -32,6 +32,26 @@
   animation: fade-in 2s ease-in-out 100ms 1 backwards;
 }
 
+.info{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.score{
+  margin: 0;
+}
+
+.restart{
+  background-color: transparent;
+  border: none;
+  color:var(--text-color);
+  padding: 0;
+  margin: 0;
+}
+
 @keyframes fade-background {
   from {
     opacity: 0;

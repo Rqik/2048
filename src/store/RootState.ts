@@ -2,6 +2,8 @@ import { makeAutoObservable } from 'mobx';
 import { Game } from './types';
 
 class RootState {
+  oldScore = 0;
+
   score = 0;
 
   maxScore = 0;
@@ -18,6 +20,7 @@ class RootState {
 
   addScore(score: number): number {
     this.score += score;
+    if (this.score > this.maxScore) this.maxScore = this.score;
     return this.score;
   }
 
@@ -41,10 +44,13 @@ class RootState {
   }
 
   restart(): void {
+    this.oldScore = this.score;
+    this.score = 0;
     this.status = Game.PLAY;
   }
 
   finish(): void {
+    this.oldScore = this.score;
     this.status = Game.FINISH;
   }
 

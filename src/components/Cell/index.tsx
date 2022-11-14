@@ -1,6 +1,5 @@
 import { clsx } from 'clsx';
 import { FC, memo, useEffect, useRef, useState } from 'react';
-import { ListFormat } from 'typescript';
 import { CellProps } from '../Board/types';
 import styles from './Cell.module.scss';
 
@@ -14,9 +13,6 @@ const Cell: FC<CellProps & { connectCell?: CellProps }> = memo(
     const cellRef = useRef<HTMLDivElement>(null);
     const [oldValue, setOldValue] = useState(value);
     const [anim, setAnim] = useState(false);
-    if (value === null) {
-      console.log(value, id, x, y, status);
-    }
 
     useEffect(() => {
       if (cellRef.current && (status !== 'create' || status === null)) {

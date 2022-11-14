@@ -13,3 +13,17 @@
   font-family: var(--font-family);
   gap: 15px;
 }
+
+.title {
+  text-align: left;
+  font-size: 64px;
+  font-weight: 900;;
+  margin: 15px;
+  color: hsl(200, 54%, 63%);
+  background-color: #e0d3c6;
+  padding: 10px 15px;
+  border-radius: 25px;
+  border: 1px solid rgba(66, 44, 10, 0.4);
+  border-bottom-width: 5px;
+  border-right-width:5px ;
+}

@@ -9,7 +9,7 @@ interface MainProps {}
 
 const Main: FC<MainProps> = (props) => (
   <div className={styles.main}>
-    2048
+    <h1 className={styles.title}>2048</h1>
     <ControlPanel />
     <Board />
   </div>

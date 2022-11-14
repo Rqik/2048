@@ -17,17 +17,25 @@ const ControlPanel: FC = () => {
   const handleColsChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     rootState.setCols(Number(e.target.value));
   };
-
+  const handleRestartGameClick = (): void => {
+    rootState.restart();
+  };
   return (
     <div className={styles.controlPanel}>
       <div className={styles.score}>
-        <div>Score : {score}</div>
+        <div>Score: {score}</div>
         <div>Max Score: {maxScore}</div>
       </div>
       <div className={styles.matrix}>
         <Field value={cols} onChange={handleColsChange} label="cols" />
         <Field value={rows} onChange={handleRowsChange} label="rows" />
-        <FontAwesomeIcon icon={faRotate} />
+        <button
+          type="button"
+          className={styles.restartIcon}
+          onClick={handleRestartGameClick}
+        >
+          <FontAwesomeIcon icon={faRotate} />
+        </button>
       </div>
     </div>
   );

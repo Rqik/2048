@@ -12,6 +12,7 @@ import {
 } from 'src/shared/helpers/matrixMethods';
 import useRootStore from 'src/store';
 import { Game } from 'src/store/types';
+import { useSwipeable } from 'react-swipeable';
 import Cell from '../Cell';
 import CellEmpty from '../CellEmpty';
 import styles from './Board.module.scss';
@@ -19,15 +20,22 @@ import { Matrix, RowCells } from './types';
 
 rotateMatrix90deg(dummyMatrix);
 interface BoardProps {}
-type KeyboardEvents = 'ArrowDown' | 'ArrowUp' | 'ArrowLeft' | 'ArrowRight';
 
+type CustomEvents = 'Down' | 'Up' | 'Left' | 'Right';
+
+const ArrowEventsMap: Record<string, CustomEvents> = {
+  ArrowDown: 'Down',
+  ArrowUp: 'Up',
+  ArrowLeft: 'Left',
+  ArrowRight: 'Right',
+};
 enum Status {
   MOVING = 'MOVING',
   COMPLETED = 'COMPLETED',
 }
 
 const statusAnimation = Status.COMPLETED;
-const statusVector: KeyboardEvents = 'ArrowDown';
+const statusVector: CustomEvents = 'Down';
 
 const rowKey = '--row-size';
 const colKey = '--col-size';
@@ -52,6 +60,7 @@ const createRowCells = (length: number, y: number): RowCells =>
   }));
 
 const maxStartSize = randomInteger(4, 8);
+
 const Board: FC<BoardProps> = (props) => {
   const { rootState } = useRootStore();
   const boardRef = useRef<HTMLDivElement>(null);
@@ -62,6 +71,51 @@ const Board: FC<BoardProps> = (props) => {
   const [cellsArr, setCellsArr] = useState(createNullArr(cellsCount));
 
   const [matrix, setMatrix] = useState(startM);
+  const moveMatrix = (
+    event: CustomEvents,
+  ): { score: number; matrix: Matrix } => {
+    let newMatrix = matrix;
+    let score = 0;
+
+    switch (event) {
+      case 'Up': {
+        const { matrix: m, score: s } = moveCellsUp(matrix);
+        newMatrix = updPosition(m);
+        score = s;
+        break;
+      }
+      case 'Right': {
+        const { matrix: m, score: s } = moveCellsUp(
+          rotateMatrix90deg(rotateMatrix90deg(rotateMatrix90deg(matrix))),
+        );
+        score = s;
+        newMatrix = updPosition(rotateMatrix90deg(m));
+        break;
+      }
+      case 'Down': {
+        const { matrix: m, score: s } = moveCellsUp(
+          rotateMatrix90deg(rotateMatrix90deg(matrix)),
+        );
+        score = s;
+        newMatrix = updPosition(rotateMatrix90deg(rotateMatrix90deg(m)));
+        break;
+      }
+      case 'Left': {
+        const { matrix: m, score: s } = moveCellsUp(rotateMatrix90deg(matrix));
+        score = s;
+        newMatrix = updPosition(
+          rotateMatrix90deg(rotateMatrix90deg(rotateMatrix90deg(m))),
+        );
+        break;
+      }
+      default:
+        break;
+    }
+    return { score, matrix: newMatrix };
+  };
+  const checkLengthValuesMatrix = (matrixV: Matrix): boolean =>
+    matrixV.flat().filter(({ value }) => value !== null).length ===
+    cellsArr.length;
 
   const addTeal = (mtx: Matrix, minCount = 1): Matrix => {
     const result = mtx.flat().filter((cell) => cell.value === null);
@@ -87,77 +141,73 @@ const Board: FC<BoardProps> = (props) => {
     return mtx;
   };
 
+  const matrixEventRunner = (event: CustomEvents): void => {
+    const isFilledArr = checkLengthValuesMatrix(matrix);
+
+    if (isFilledArr) {
+      const arrEvents: CustomEvents[] = ['Down', 'Left', 'Right', 'Up'];
+      let stopGame = true;
+
+      arrEvents.forEach((key) => {
+        const { matrix: m } = moveMatrix(key);
+        if (!checkLengthValuesMatrix(m)) {
+          stopGame = false;
+        }
+      });
+
+      if (stopGame) {
+        rootState.finish();
+        return;
+      }
+    }
+    const { score, matrix: m } = moveMatrix(event);
+    rootState.addScore(score);
+    setMatrix(m);
+    setMatrix(addTeal(m, 1));
+  };
+
+  const handlers = useSwipeable({
+    onSwiped: (eventData) => {
+      matrixEventRunner(eventData.dir);
+    },
+  });
+
   const handleArrowClick = useCallback(
     (e: KeyboardEvent): void => {
-      const event: KeyboardEvents | string = e.key;
-      let newMatrix = matrix;
-      let score = 0;
-
-      switch (event) {
-        case 'ArrowUp': {
-          const { matrix: m, score: s } = moveCellsUp(matrix);
-          newMatrix = updPosition(m);
-          score = s;
-          break;
-        }
-        case 'ArrowRight': {
-          const { matrix: m, score: s } = moveCellsUp(
-            rotateMatrix90deg(rotateMatrix90deg(rotateMatrix90deg(matrix))),
-          );
-          score = s;
-          newMatrix = updPosition(rotateMatrix90deg(m));
-          break;
-        }
-        case 'ArrowDown': {
-          const { matrix: m, score: s } = moveCellsUp(
-            rotateMatrix90deg(rotateMatrix90deg(matrix)),
-          );
-          score = s;
-          newMatrix = updPosition(rotateMatrix90deg(rotateMatrix90deg(m)));
-          break;
-        }
-        case 'ArrowLeft': {
-          const { matrix: m, score: s } = moveCellsUp(
-            rotateMatrix90deg(matrix),
-          );
-          score = s;
-          newMatrix = updPosition(
-            rotateMatrix90deg(rotateMatrix90deg(rotateMatrix90deg(m))),
-          );
-          break;
-        }
-        default:
-          break;
-      }
-      rootState.setMaScore(rootState.addScore(score));
-      setMatrix(newMatrix);
-      setMatrix(addTeal(newMatrix, 1));
+      const event = ArrowEventsMap[e.key];
+      if (!event) return;
+      matrixEventRunner(event);
     },
     [matrix, addTeal],
   );
 
-  const startGame = (): void => {
+  const startGame = useCallback((): void => {
     setStartM(Array.from({ length: rows }, (_, y) => createRowCells(cols, y)));
-  };
+  }, [cols, rows]);
 
-  const handleRestartClick = (): void => {
+  const restartGame = (): void => {
     startGame();
     rootState.restart();
   };
 
+  const handleRestartClick = (): void => {
+    restartGame();
+  };
+
   useEffect(() => {
-    startGame();
-  }, []);
+    if (rootState.status === Game.PLAY) {
+      restartGame();
+    }
+  }, [rootState.status]);
 
   useEffect(() => {
     setCellsArr(createNullArr(cellsCount));
-    console.log('cellsArr', cellsArr);
   }, [cellsCount]);
 
   useEffect(() => {
     setCellsCount(rows * cols);
     startGame();
-  }, [rows, cols]);
+  }, [rows, cols, startGame]);
 
   useEffect(() => {
     setMatrix(addTeal(startM, 2));
@@ -172,27 +222,32 @@ const Board: FC<BoardProps> = (props) => {
 
   useEffect(() => {
     window.addEventListener('keydown', handleArrowClick);
-
+    if (boardRef.current) {
+      boardRef.current.addEventListener('pointer', () => {
+        console.log('e');
+      });
+    }
     return () => {
       window.removeEventListener('keydown', handleArrowClick);
     };
   }, [handleArrowClick]);
 
-  useEffect(() => {
-    if (rootState.status === Game.RESTART) {
-      startGame();
-    }
-  }, [rootState.status]);
-
   return (
-    <div className={styles.board} ref={boardRef}>
+    <div className={styles.board} {...handlers}>
       {rootState.status === Game.FINISH && (
         <div className={styles.overlay}>
           <div className={styles.content}>
             <h2>Game over</h2>
-            <button type="button" onClick={handleRestartClick}>
-              restart <FontAwesomeIcon icon={faRotate} />
-            </button>
+            <div className={styles.info}>
+              <h3 className={styles.score}>Score: {rootState.oldScore}</h3>
+              <button
+                type="button"
+                onClick={handleRestartClick}
+                className={styles.restart}
+              >
+                restart <FontAwesomeIcon icon={faRotate} />
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -201,7 +256,7 @@ const Board: FC<BoardProps> = (props) => {
         <CellEmpty key={x} />
       ))}
 
-      {flatSortedMatrix(matrix).map((cell, i) => {
+      {flatSortedMatrix(matrix).map((cell) => {
         const { value, id, status, linkedCellId } = cell;
         if (value === null && status !== 'stop') return <Fragment key={id} />;
         if (status === 'stop')
