@@ -1,4 +1,5 @@
-# **2048** game
+# **2048** game 
+## [Demo page](https://rqik.github.io/2048/)
 
 This project was created solely for the purpose of teaching and training skills
 
